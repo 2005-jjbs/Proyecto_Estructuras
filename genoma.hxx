@@ -10,5 +10,8 @@ vector<secuencia> genoma::get_secuencias(){
 return this->secuencias;
 } 
 void genoma::set_secuencias(vector<secuencia> nuevas_secuencias){
-    this->secuencias = nuevas_secuencias;
+    this->secuencias.clear(); // Limpia cualquier secuencia previa
+    for (int i = 0; i < nuevas_secuencias.size(); i++) {
+        this->secuencias.push_back(nuevas_secuencias[i]);
+    }
 }

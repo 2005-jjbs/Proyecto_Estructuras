@@ -4,40 +4,42 @@
 #include "sistema.h"
 #include "secuencia.h"
 
-void sistema::cargar_archivo(string nombre_archivo){
+void sistema::cargar_archivo(string nombre_archivo) {
     ifstream archivo(nombre_archivo);
-    if(archivo.is_open()){
+    if (archivo.is_open()) {
         string linea;
         string nombre;
-        string descripcion;        
-        while(getline(archivo, linea)){
-            if(linea[0] == '>'){
-                if(!descripcion.empty() && !nombre.empty()){
-                secuencia s;
-                s.set_nombre(nombre);
-                s.set_descripcion(descripcion);
-                this->genomita.agregar_secuencias(s);
+        vector<char> descripcion;
+        while (getline(archivo, linea)) {
+            if (linea[0] == '>') {
+                if (!descripcion.empty() && !nombre.empty()) {
+                    secuencia s;
+                    s.set_nombre(nombre);
+                    s.set_descripcion(descripcion);
+                    this->genomita.agregar_secuencias(s);
                 }
                 nombre = linea.substr(1);
-                descripcion = "";
-            }
-            else if(!linea.empty()){
-            descripcion += linea;
+                descripcion.clear();
+            } else {
+                for (char c : linea) {
+                    descripcion.push_back(c);
+                }
+                descripcion.push_back('\n'); // Conserva el salto de línea original
             }
         }
-        
-        if(!descripcion.empty() && !nombre.empty()){
+        if (!descripcion.empty() && !nombre.empty()) {
             secuencia s;
             s.set_nombre(nombre);
             s.set_descripcion(descripcion);
             this->genomita.agregar_secuencias(s);
         }
         archivo.close();
-    }
-    else{
+        cout << "Se cargo correctamente el archivo" << endl;
+    } else {
         cout << "Error: No se pudo abrir el archivo " << nombre_archivo << endl;
     }
 }
+
 bool sistema::es_subsecuencia(vector<char> subsecuencia){
     vector<secuencia> secuencias = this->genomita.get_secuencias();
     int contador = 0;
@@ -47,7 +49,7 @@ bool sistema::es_subsecuencia(vector<char> subsecuencia){
     vector<char>::iterator sub;
     if(secuencias.empty()){
         cout << "No hay secuencias cargadas en el genoma." << endl;
-        return false;    
+        return true;    
     }
     for (it1 = secuencias.begin(); it1 != secuencias.end(); it1++){
         vector<char> ar = it1->get_descripcion();
@@ -79,17 +81,17 @@ bool sistema::es_subsecuencia(vector<char> subsecuencia){
         cout << "La subsecuencia no fue encontrada en el genoma." << endl;
         return false;
     }
-    return false;  
+      
 }
 
 //funcion listar secuencias
 void sistema::listar_secuencias(){
-   
     vector<secuencia> secuencias = this->genomita.get_secuencias();
-     if(secuencias.empty()){
+    if(secuencias.empty()){
         cout << "No hay secuencias cargadas en el genoma." << endl;
         return;    
     }
+
     int cantidad = secuencias.size();
     cout << "Hay" << cantidad << "secuencias cargadas en memoria" << endl;
     for (int i = 0; i < cantidad; i++){
@@ -98,19 +100,22 @@ void sistema::listar_secuencias(){
        int bases = 0;
        bool incompleta = false;
        for (int j = 0; j < descripcion.size(); j++){
-           if(descripcion[j] == '-'){
+           if(descripcion[j] == '-' || descripcion[j] == 'R' || descripcion[j] == 'Y' || descripcion[j] == 'K' || descripcion[j] == 'M' || descripcion[j] == 'S' || descripcion[j] == 'W' || descripcion[j] == 'B' || descripcion[j] == 'D' || descripcion[j] == 'H' || descripcion[j] == 'V' || descripcion[j] == 'N'){
                incompleta = true;
            }else{
             bases++;
            }
        }
        cout << "Secuencia: " << nombre << endl;
+       for (int j = 0; j < descripcion.size(); j++){
+            cout << descripcion[j];
+        }
        if (incompleta){
-        cout << "contiene al menos " << descripcion.size() << " bases" << endl;
+        cout << endl <<"contiene al menos " << bases << " bases" << endl;
        }else{
-        cout << "contiene " << bases << " bases" << endl;
+        cout << endl <<"contiene " << bases << " bases" << endl;
        }
-       
+
     }
 }
 
@@ -157,9 +162,11 @@ void sistema::enmascarar(vector<char> subsecuencia){
 void sistema::histograma(string nombre_secuencia){
     vector<secuencia> secuencias = this->genomita.get_secuencias();
     vector<secuencia>::iterator it;
-    int a = 0, c = 0, g = 0, t = 0, u = 0, r = 0, y = 0, k = 0, m = 0, s = 0, w = 0, b = 0, d = 0, h = 0, v = 0, n = 0;
+    bool encontrado = false;
+    int a = 0, c = 0, g = 0, t = 0, u = 0, r = 0, y = 0, k = 0, m = 0, s = 0, w = 0, b = 0, d = 0, h = 0, v = 0, n = 0, sep = 0;
     for(it = secuencias.begin(); it != secuencias.end(); it++){
         if(it->get_nombre() == nombre_secuencia){
+            encontrado = true;
             vector<char> descripcion = it->get_descripcion();
             vector<char>::iterator it_desc;
             for ( it_desc = descripcion.begin(); it_desc != descripcion.end(); it_desc++){
@@ -180,11 +187,18 @@ void sistema::histograma(string nombre_secuencia){
                     case 'H': h++; break;
                     case 'V': v++; break;
                     case 'N': n++; break;
+                    case '-': sep++; break;
 
                 }
         }
     }
-    cout << "La secuencia " << nombre_secuencia << " no fue encontrada." << endl;
+
+}
+
+    if(!encontrado){
+        cout << "La secuencia " << nombre_secuencia << " no fue encontrada." << endl;
+        return;
+    }
     cout <<"Histograma de la secuencia " << nombre_secuencia << ":" << endl;
     cout << "A: " << a << endl;
     cout << "C: " << c << endl;
@@ -202,33 +216,32 @@ void sistema::histograma(string nombre_secuencia){
     cout << "H: " << h << endl;
     cout << "V: " << v << endl;
     cout << "N: " << n << endl;
-
-}
-
-return;
+    cout << "-: " << sep << endl;
+    return;
 
 }
 
 
 //Implementacion funcion que guarda en archivo
 
-void sistema::guardar(string nombre_archivo){
+void sistema::guardar(string nombre_archivo) {
     ofstream archivo(nombre_archivo);
-    if(archivo.is_open()){
+    if (archivo.is_open()) {
         vector<secuencia> secuencias = this->genomita.get_secuencias();
-        vector<secuencia>::iterator it;
-        for(it = secuencias.begin(); it != secuencias.end(); it++){
-            archivo << it->get_nombre() << endl;
-            vector<char>::iterator it2;
-            for(it2 = it->get_descripcion().begin(); it2 != it->get_descripcion().end(); it2++){
-                archivo << *it2;
+        if (secuencias.empty()) {
+            cout << "No hay secuencias para guardar." << endl;
+            return;
+        }
+        for (vector<secuencia>::iterator it = secuencias.begin(); it != secuencias.end(); it++) {
+            archivo << ">" << it->get_nombre() << endl;
+            vector<char> desc = it->get_descripcion();
+            for (char c : desc) {
+                archivo << c;
             }
-            archivo << endl;
         }
         archivo.close();
-        cout << "Secciones guardadas en " << nombre_archivo << endl;
-    }
-    else{
+        cout << "Secuencias guardadas en " << nombre_archivo << endl;
+    } else {
         cout << "Error: No se pudo guardar el archivo " << nombre_archivo << endl;
     }
 }

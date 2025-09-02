@@ -118,14 +118,8 @@ int main() {
         s.enmascarar(subsecuencia);
     }
     else if(token == "guardar"){
-         if (parametro.size() >= 4) {
-            string ext = parametro.substr(parametro.size() - 4);
-            if (ext != ".bin" && ext != ".txt") {
-            cout << "Extension invalida. El archivo debe ser .bin o .txt\n";
-            continue;
-            }
-        } else {
-            cout << "Extension invalida. El archivo debe ser .bin o .txt\n";
+        if(parametro.size() < 4 || parametro.substr(parametro.size() - 3) != ".fa") {
+            cout << "Extension invalida. El archivo debe ser .fa\n";
             continue;
         }
         s.guardar(parametro);
@@ -238,6 +232,9 @@ int main() {
             cout<<"(la base existe) Para la secuencia descripcion_secuencia , la base remota está ubicada en [a ,b ], y la ruta entre la base en [i ,j ] y la base remota en [a ,b ] es: .... El costo total de la ruta es: ...\n";
             cout<<"base remota descripcion secuencia i j\n";
         }
+        else{
+            cout<<"(comando desconocido) El comando " << parametro << " no es reconocido.\n";
+        }
     }
 
     else if(token == "ruta_mas_corta"){
@@ -296,6 +293,14 @@ int main() {
         }
         base_remota(args);
     }
+    else if(token == "salir"){
+        cout << "Saliendo del programa...\n";
+        break;
+    }
+    else{
+            cout<<"(comando desconocido) El comando " << token << " no es reconocido.\n";
+            
+        }
     }
 }
 

@@ -9,6 +9,7 @@ void secuencia::set_nombre(string n){
 }
 
 void secuencia::set_descripcion(string n){
+    this->descripcion.clear();
     for(char c:n){
         this->descripcion.push_back(c);
     }
